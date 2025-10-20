@@ -1,35 +1,48 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Camera_Mover : MonoBehaviour
 {
     Transform transformer;
-    public float sensX;
-    public float sensY;
-
+    public float sens;
     public float moveSpeed;
+    public Slider positionOffset;
 
     float xRotation, yRotation;
+
+    Quaternion mouseDrag;
+    public Transform rotateAround;
+
+    [HideInInspector] public int cameraModeInt = 2;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         transformer = GetComponent<Transform>();
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        Rotation();
+        if (cameraModeInt == 1)
+        {
+            Debug.Log("camera mode on wasd");
+            WASDRotation();
 
-        Translation();
+            WASDTranslation();
+        }
+        else if (cameraModeInt == 2)
+        {
+            PivotMovement();
+        }
+
     }
 
-    void Rotation()
+    void WASDRotation()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
+        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sens;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sens;
 
         xRotation -= mouseY;
         yRotation += mouseX;
@@ -37,9 +50,9 @@ public class Camera_Mover : MonoBehaviour
         transformer.rotation = Quaternion.Euler(xRotation, yRotation, 0);
     }
 
-    void Translation()
+    void WASDTranslation()
     {
-        if(Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W))
         {
             transform.position += (Vector3.forward.z * transform.forward) * Time.deltaTime * moveSpeed;
         }
@@ -56,5 +69,29 @@ public class Camera_Mover : MonoBehaviour
         {
             transform.position += (Vector3.left.x * transform.right) * Time.deltaTime * moveSpeed;
         }
+    }
+
+    void PivotMovement()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            float mouseX = Input.GetAxisRaw("Mouse X");
+            float mouseY = Input.GetAxisRaw("Mouse Y");
+
+            xRotation -= mouseY * sens * Time.deltaTime;
+            yRotation += mouseX * sens * Time.deltaTime;
+
+            mouseDrag = Quaternion.Euler(xRotation, yRotation, 0f);
+
+            Vector3 position = mouseDrag * new Vector3(0, 0, positionOffset.value);
+            transform.position = rotateAround.position + position;
+            transformer.rotation = mouseDrag;
+
+        }
+    }
+
+    public void SwapCameraMode(int cameraMode)
+    {
+        cameraModeInt = cameraMode;
     }
 }
