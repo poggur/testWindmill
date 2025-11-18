@@ -8,12 +8,12 @@ public class Camera_Mover : MonoBehaviour
     Transform transformer;
     public float sens;
     public float moveSpeed;
-    public Slider positionOffset;
+    [SerializeField] private Slider positionOffset;
 
     float xRotation, yRotation;
 
     Quaternion mouseDrag;
-    public Transform rotateAround;
+    [SerializeField] private Transform rotateAround;
 
     [HideInInspector] public int cameraModeInt = 2;
 
